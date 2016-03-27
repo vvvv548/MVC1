@@ -21,6 +21,22 @@ namespace MVC1.Controllers
             return View(客戶聯絡人.Where(p => p.是否已刪除 == false).ToList());
         }
 
+        [HttpPost]
+        public ActionResult Index(string name)
+        {
+            return View(db.客戶聯絡人
+                .Include(客 => 客.客戶資料)
+                .Where(p => p.是否已刪除 == false)
+                .Where(p => p.客戶資料.客戶名稱.Contains(name) ||
+                       p.姓名.Contains(name) ||
+                       p.職稱.Contains(name) ||
+                       p.電話.Contains(name) ||
+                       p.手機.Contains(name) ||
+                       p.電話.Contains(name) ||
+                       p.Email.Contains(name))
+                .ToList());
+        }
+
         // GET: 客戶聯絡人/Details/5
         public ActionResult Details(int? id)
         {

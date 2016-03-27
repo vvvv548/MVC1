@@ -4,13 +4,21 @@
     ViewBag.Title = "Index";
 }
 
-<h2>客戶聯絡人首頁</h2>
+<h2>客戶聯絡人</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
+@using (Html.BeginForm())
+{
+    <p>
+        @Html.ActionLink("新增聯絡人", "Create", new { }, new { @class = "btn btn-xs  btn-primary" })
+        <input type="text" name="name" />
+        <input id="Search" type="submit" value="搜尋" class="btn btn-xs" />
+    </p>
+}
 <table class="table">
     <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.客戶資料.客戶名稱)
+        </th>
         <th>
             @Html.DisplayNameFor(model => model.職稱)
         </th>
@@ -26,14 +34,15 @@
         <th>
             @Html.DisplayNameFor(model => model.電話)
         </th>
-        <th>
-            @Html.DisplayNameFor(model => model.客戶資料.客戶名稱)
-        </th>
+
         <th></th>
     </tr>
 
 @foreach (var item in Model) {
     <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.客戶資料.客戶名稱)
+        </td>
         <td>
             @Html.DisplayFor(modelItem => item.職稱)
         </td>
@@ -48,9 +57,6 @@
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.電話)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.客戶資料.客戶名稱)
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |

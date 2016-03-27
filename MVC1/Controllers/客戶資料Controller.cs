@@ -17,7 +17,21 @@ namespace MVC1.Controllers
         // GET: 客戶資料
         public ActionResult Index()
         {
-            return View(db.客戶資料.Where(p=>p.是否已刪除==false).ToList());
+            return View(db.客戶資料.Where(p => p.是否已刪除 == false).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult Index(string name)
+        {
+            return View(db.客戶資料
+                .Where(p => p.是否已刪除 == false)
+                .Where(p => p.客戶名稱.Contains(name) ||
+                       p.統一編號.Contains(name) ||
+                       p.電話.Contains(name) ||
+                       p.傳真.Contains(name) ||
+                       p.地址.Contains(name) ||
+                       p.Email.Contains(name))
+                .ToList());
         }
 
         // GET: 客戶資料/Details/5

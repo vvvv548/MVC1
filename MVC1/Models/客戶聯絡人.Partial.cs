@@ -3,7 +3,7 @@ namespace MVC1.Models
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-
+    using System.Linq;
     [MetadataType(typeof(客戶聯絡人MetaData))]
     public partial class 客戶聯絡人 : IValidatableObject
     {
@@ -11,12 +11,10 @@ namespace MVC1.Models
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            var data = db.Database.SqlQuery<客戶聯絡人>(
-                @"SELECT * FROM dbo.客戶聯絡人 WHERE 客戶Id =@p0 AND
-                  Email=@p1", this.客戶Id, this.Email);
+            var data = db.客戶聯絡人.Where(p => p.Email == this.Email && p.Id != this.Id && p.客戶Id == this.客戶Id);
 
-
-            if (data!=null)
+            bool isDuplicate = data.Count() > 0 ? true : false;
+            if (isDuplicate)
             {
                 yield return new ValidationResult("相同一個客戶下的聯絡人Email不可重複！請重新輸入！",
                     new string[] { "Email" });

@@ -20,6 +20,20 @@ namespace MVC1.Controllers
             var 客戶銀行資訊 = db.客戶銀行資訊.Include(客 => 客.客戶資料);
             return View(客戶銀行資訊.Where(p => p.是否已刪除 == false).ToList());
         }
+        [HttpPost]
+        public ActionResult Index(string name)
+        {
+            return View(db.客戶銀行資訊
+                .Include(客 => 客.客戶資料)
+                .Where(p => p.是否已刪除 == false)
+                .Where(p => p.客戶資料.客戶名稱.Contains(name) ||
+                            p.銀行名稱.ToString().Contains(name) ||
+                            p.銀行代碼.ToString().Contains(name) ||
+                            p.帳戶名稱.ToString().Contains(name) ||
+                            p.帳戶號碼.ToString().Contains(name) ||
+                            p.分行代碼.ToString().Contains(name) )
+                .ToList());
+        }
 
         // GET: 客戶銀行資訊/Details/5
         public ActionResult Details(int? id)
