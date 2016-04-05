@@ -4,14 +4,29 @@
     ViewBag.Title = "Index";
 }
 
+@if (TempData["CustBankSuccessMsg"] != null)
+{
+    <script>
+        alert('@TempData["CustBankSuccessMsg"]');
+    </script>
+}
+
+<script>
+    function Export(url) {
+        $("#form").attr("action",url);
+        $("#form").submit();
+    }
+</script>
+
 <h2>客戶銀行資訊</h2>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "form" }))
 {
     <p>
         @Html.ActionLink("新增銀行資訊", "Create", new { }, new { @class = "btn btn-xs  btn-primary" })
+        <button id="btnExport" class="btn btn-xs btn-primary"  onclick="Export('@Url.Action("ExportExcel", "客戶銀行資訊")')">匯出客戶銀行資訊</button>
         <input type="text" name="name" />
-        <input id="Search" type="submit" value="搜尋" class="btn btn-xs" />
+        <input id="Search" type="submit" value="搜尋" class="btn btn-xs" />        
     </p>
 }
 <table class="table">

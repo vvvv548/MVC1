@@ -57,8 +57,10 @@
         <dd>
             @Html.DisplayFor(model => model.Email)
         </dd>
-
     </dl>
+</div>
+<div>
+    @{Html.RenderAction("_CustContactPartial", "客戶資料", new { id = Model.Id });}
 </div>
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |

@@ -4,12 +4,27 @@
     ViewBag.Title = "Index";
 }
 
+@if (TempData["CustContactSuccessMsg"] != null)
+{
+    <script>
+        alert('@TempData["CustContactSuccessMsg"]');
+    </script>
+}
+
+<script>
+    function Export(url) {
+        $("#form").attr("action",url);
+        $("#form").submit();
+    }
+</script>
+
 <h2>客戶聯絡人</h2>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "form" }))
 {
     <p>
         @Html.ActionLink("新增聯絡人", "Create", new { }, new { @class = "btn btn-xs  btn-primary" })
+        <button id="btnExport" class="btn btn-xs btn-primary" onclick="Export('@Url.Action("ExportExcel", "客戶聯絡人")')">匯出客戶聯絡人</button>
         <input type="text" name="name" />
         <input id="Search" type="submit" value="搜尋" class="btn btn-xs" />
     </p>

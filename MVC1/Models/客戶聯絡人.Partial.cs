@@ -27,6 +27,7 @@ namespace MVC1.Models
         [Required]
         public int Id { get; set; }
         [Required]
+        [Display(Name = "客戶名稱", Description = "FK.客戶資料.客戶名稱")]
         public int 客戶Id { get; set; }
         
         [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]

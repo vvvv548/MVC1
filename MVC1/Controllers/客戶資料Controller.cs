@@ -10,28 +10,22 @@ using MVC1.Models;
 
 namespace MVC1.Controllers
 {
-    public class 客戶資料Controller : Controller
+    public class 客戶資料Controller : BaseController
     {
-        private 客戶資料Entities db = new 客戶資料Entities();
+        //private 客戶資料Entities db = new 客戶資料Entities();
 
         // GET: 客戶資料
         public ActionResult Index()
         {
-            return View(db.客戶資料.Where(p => p.是否已刪除 == false).ToList());
+            var data = repoCustInfo.All(false).ToList();
+            return View(data);
         }
 
         [HttpPost]
         public ActionResult Index(string name)
         {
-            return View(db.客戶資料
-                .Where(p => p.是否已刪除 == false)
-                .Where(p => p.客戶名稱.Contains(name) ||
-                       p.統一編號.Contains(name) ||
-                       p.電話.Contains(name) ||
-                       p.傳真.Contains(name) ||
-                       p.地址.Contains(name) ||
-                       p.Email.Contains(name))
-                .ToList());
+            var data = repoCustInfo.Search(name).ToList();
+            return View(data);
         }
 
         // GET: 客戶資料/Details/5
@@ -41,7 +35,7 @@ namespace MVC1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repoCustInfo.Find(id.Value);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -52,6 +46,7 @@ namespace MVC1.Controllers
         // GET: 客戶資料/Create
         public ActionResult Create()
         {
+            ViewBag.Client = repoCustInfo.GetCustClass();
             return View();
         }
 
@@ -60,16 +55,15 @@ namespace MVC1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email")] 客戶資料 客戶資料)
+        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,客戶分類")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
-                客戶資料.是否已刪除 = false;
-                db.客戶資料.Add(客戶資料);
-                db.SaveChanges();
+                repoCustInfo.Add(客戶資料);
+                repoCustInfo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-
+            ViewBag.Client = repoCustInfo.GetCustClass();
             return View(客戶資料);
         }
 
@@ -80,11 +74,12 @@ namespace MVC1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repoCustInfo.Find(id.Value);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
             }
+            ViewBag.Client = repoCustInfo.GetCustClass();
             return View(客戶資料);
         }
 
@@ -93,14 +88,17 @@ namespace MVC1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除")] 客戶資料 客戶資料)
+        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除,客戶分類")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(客戶資料).State = EntityState.Modified;
-                db.SaveChanges();
+                var db客戶資料 = (客戶資料Entities)repoCustInfo.UnitOfWork.Context;
+                db客戶資料.Entry(客戶資料).State = EntityState.Modified;
+                repoCustInfo.UnitOfWork.Commit();
+                TempData["CustInfoSuccessMsg"] = 客戶資料.客戶名稱 + "更新成功";
                 return RedirectToAction("Index");
             }
+            ViewBag.Client = repoCustInfo.GetCustClass();
             return View(客戶資料);
         }
 
@@ -111,11 +109,12 @@ namespace MVC1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repoCustInfo.Find(id.Value);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
             }
+
             return View(客戶資料);
         }
 
@@ -124,17 +123,47 @@ namespace MVC1.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
-            客戶資料.是否已刪除 = true;
-            db.SaveChanges();
+            客戶資料 客戶資料 = repoCustInfo.Find(id);
+            repoCustInfo.Delete(客戶資料);
+            repoCustInfo.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
+        public ActionResult ExportExcel()
+        {
+           return File(repoCustInfo.ExportXLS(repoCustInfo.All(false)), "application/vnd.ms-excel", "客戶資料.xls");            
+        }
 
+        public ActionResult _CustContactPartial(int id)
+        {
+            var data = repoCustContact.All(false).Where(p => p.客戶Id == id).ToList();
+            return PartialView(data);
+        }
+        [HttpPost]
+        public ActionResult _CustContactPartial(IList<客戶聯絡人> data)
+        {
+            if (ModelState.IsValid &&　data != null)
+            {
+                int custId = -1;
+                
+                foreach (var item in data)
+                {
+                    var contactdata = repoCustContact.Find(item.Id);
+                    contactdata.職稱 = item.職稱;
+                    contactdata.手機 = item.手機;
+                    contactdata.電話 = item.電話;
+                    custId = item.客戶Id;
+                }
+                repoCustContact.UnitOfWork.Commit();
+                return View(repoCustContact.All(false).Where(p => p.客戶Id == custId));
+            }
+            
+            return View();
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                db.Dispose();
+                repoCustInfo.UnitOfWork.Context.Dispose();
             }
             base.Dispose(disposing);
         }
