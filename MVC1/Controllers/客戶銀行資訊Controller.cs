@@ -7,23 +7,26 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MVC1.Models;
+using PagedList;
 
 namespace MVC1.Controllers
 {
     public class 客戶銀行資訊Controller : BaseController
     {
         //private 客戶資料Entities db = new 客戶資料Entities();
-
+        private int pageSize = 3;
         // GET: 客戶銀行資訊
-        public ActionResult Index()
+        public ActionResult Index(int page = 1)
         {
-            var data = repoCustBank.All(false).ToList();
+            var data = repoCustBank.PagedList(page);
             return View(data);
         }
         [HttpPost]
-        public ActionResult Index(string name)
+        public ActionResult Index(string name, int page=1)
         {
-            return View(repoCustBank.Search(name).ToList());
+            var data = repoCustBank.Search(name);
+            var result = repoCustBank.PagedList(data, page);
+            return View(result);
         }
 
         // GET: 客戶銀行資訊/Details/5

@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-	
+using PagedList;
+
 namespace MVC1.Models
 {   
 	public  class 客戶銀行資訊Repository : EFRepository<客戶銀行資訊>, I客戶銀行資訊Repository
@@ -40,6 +41,21 @@ namespace MVC1.Models
         public 客戶銀行資訊 Find(int id)
         {
             return this.All().FirstOrDefault(p => p.Id == id);
+        }
+        public IPagedList<客戶銀行資訊> PagedList(int page)
+        {
+            int currentPage = page < 1 ? 1 : page;
+            int pageSize = 3;
+            var data = this.All().OrderBy(p => p.Id)
+                .ToPagedList(currentPage, pageSize);
+            return data;
+        }
+
+        public IPagedList<客戶銀行資訊> PagedList(IQueryable<客戶銀行資訊> data, int page)
+        {
+            int currentPage = page < 1 ? 1 : page;
+            int pageSize = 3;
+            return data.OrderBy(p => p.客戶Id).ToPagedList(currentPage, pageSize);
         }
         public override void Delete(客戶銀行資訊 entity)
         {

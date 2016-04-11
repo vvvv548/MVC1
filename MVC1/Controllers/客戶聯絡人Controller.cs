@@ -7,24 +7,29 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MVC1.Models;
+using PagedList;
 
 namespace MVC1.Controllers
 {
     public class 客戶聯絡人Controller : BaseController
     {
         private 客戶資料Entities db = new 客戶資料Entities();
-
+        private int pageSize = 3;
         // GET: 客戶聯絡人
-        public ActionResult Index()
+        public ActionResult Index(int page = 1)
         {
-            var data = repoCustContact.All(false).ToList();
+            var data = repoCustContact.PagedList(page);
+            ViewBag.JobTitle = data.Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
             return View(data);
         }
 
         [HttpPost]
-        public ActionResult Index(string name)
+        public ActionResult Index(string name, int page = 1)
         {
-            return View(repoCustContact.Search(name).ToList());
+            var data = repoCustContact.Search(name);
+            var result = repoCustContact.PagedList(data, page);
+            ViewBag.JobTitle = result.Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
+            return View(result);
         }
 
         // GET: 客戶聯絡人/Details/5
@@ -57,7 +62,7 @@ namespace MVC1.Controllers
         public ActionResult Create([Bind(Include = "Id,客戶Id,職稱,姓名,Email,手機,電話")] 客戶聯絡人 客戶聯絡人)
         {
             if (ModelState.IsValid)
-            {                
+            {
                 repoCustContact.Add(客戶聯絡人);
                 repoCustContact.UnitOfWork.Commit();
                 return RedirectToAction("Index");

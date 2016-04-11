@@ -1,7 +1,8 @@
-﻿@model IEnumerable<MVC1.Models.客戶聯絡人>
+﻿@model IPagedList<MVC1.Models.客戶聯絡人>
 
 @{
     ViewBag.Title = "Index";
+    <link href="~/Content/PagedList.css" rel="stylesheet" />
 }
 
 @if (TempData["CustContactSuccessMsg"] != null)
@@ -32,22 +33,23 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.客戶資料.客戶名稱)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().客戶資料.客戶名稱)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.職稱)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().職稱)
+            @Html.DropDownList("JobTitle", (IEnumerable<SelectListItem>)ViewBag.JobTitle, "全部")
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.姓名)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().姓名)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Email)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().Email)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.手機)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().手機)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.電話)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().電話)
         </th>
 
         <th></th>

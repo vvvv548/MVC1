@@ -7,33 +7,36 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MVC1.Models;
+using System.Web.Security;
+using PagedList;
 
 namespace MVC1.Controllers
 {
     public class 客戶資料Controller : BaseController
     {
         //private 客戶資料Entities db = new 客戶資料Entities();
-
         // GET: 客戶資料
-        public ActionResult Index()
+        public ActionResult Index(int page=1)
         {
-            var data = repoCustInfo.All(false).ToList();
+            var data = repoCustInfo.PagedList(page);            
             return View(data);
         }
-
-        [HttpPost]
-        public ActionResult Index(string name)
+        
+        [HttpPost]        
+        public ActionResult Index(string name, int page=1)
         {
-            var data = repoCustInfo.Search(name).ToList();
-            return View(data);
+            var data = repoCustInfo.Search(name);
+            var result = repoCustInfo.PagedList(data,page);
+            return View(result);
         }
 
         // GET: 客戶資料/Details/5
+        [HandleError(ExceptionType = typeof(InvalidOperationException), View = "Error2")]
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                throw new ArgumentException("參數錯誤");
             }
             客戶資料 客戶資料 = repoCustInfo.Find(id.Value);
             if (客戶資料 == null)
@@ -55,7 +58,7 @@ namespace MVC1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,客戶分類")] 客戶資料 客戶資料)
+        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,客戶分類,帳號,密碼")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
@@ -63,11 +66,11 @@ namespace MVC1.Controllers
                 repoCustInfo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
-            ViewBag.Client = repoCustInfo.GetCustClass();
             return View(客戶資料);
         }
-
         // GET: 客戶資料/Edit/5
+        [OverrideAuthorization()]
+        [Authorize]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -88,17 +91,25 @@ namespace MVC1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,是否已刪除,客戶分類")] 客戶資料 客戶資料)
+        [OverrideAuthorization()]
+        [Authorize]
+        public ActionResult Edit(int id, FormCollection form)
         {
-            if (ModelState.IsValid)
+            var 客戶資料 = repoCustInfo.Find(id);
+            if (TryUpdateModel(客戶資料, "客戶名稱,統一編號,電話,傳真,地址,Email,客戶分類,帳號,密碼".Split(',')))
             {
-                var db客戶資料 = (客戶資料Entities)repoCustInfo.UnitOfWork.Context;
-                db客戶資料.Entry(客戶資料).State = EntityState.Modified;
-                repoCustInfo.UnitOfWork.Commit();
+                //var db客戶資料 = (客戶資料Entities)repoCustInfo.UnitOfWork.Context;
+                //db客戶資料.Entry(客戶資料).State = EntityState.Modified;
+                客戶資料.密碼 = FormsAuthentication.HashPasswordForStoringInConfigFile(客戶資料.密碼, "SHA1");
+                repoCustInfo.UnitOfWork.Commit();                
+                if(!User.IsInRole("sysadmin"))
+                {
+                    return View(客戶資料);
+                }
                 TempData["CustInfoSuccessMsg"] = 客戶資料.客戶名稱 + "更新成功";
                 return RedirectToAction("Index");
             }
-            ViewBag.Client = repoCustInfo.GetCustClass();
+
             return View(客戶資料);
         }
 
@@ -130,7 +141,7 @@ namespace MVC1.Controllers
         }
         public ActionResult ExportExcel()
         {
-           return File(repoCustInfo.ExportXLS(repoCustInfo.All(false)), "application/vnd.ms-excel", "客戶資料.xls");            
+            return File(repoCustInfo.ExportXLS(repoCustInfo.All(false)), "application/vnd.ms-excel", "客戶資料.xls");
         }
 
         public ActionResult _CustContactPartial(int id)
@@ -141,10 +152,14 @@ namespace MVC1.Controllers
         [HttpPost]
         public ActionResult _CustContactPartial(IList<客戶聯絡人> data)
         {
-            if (ModelState.IsValid &&　data != null)
+            for (int i = 0; i < data.Count; i++)
             {
-                int custId = -1;
-                
+                ModelState.Remove("data[" + i.ToString() + "].姓名");
+                ModelState.Remove("data[" + i.ToString() + "].Email");
+            }
+            int custId = -1;
+            if (ModelState.IsValid && data != null)
+            {
                 foreach (var item in data)
                 {
                     var contactdata = repoCustContact.Find(item.Id);
@@ -156,8 +171,8 @@ namespace MVC1.Controllers
                 repoCustContact.UnitOfWork.Commit();
                 return View(repoCustContact.All(false).Where(p => p.客戶Id == custId));
             }
-            
-            return View();
+            ViewData.Model = repoCustContact.All(false).Where(p => p.客戶Id == custId);
+            return PartialView();
         }
         protected override void Dispose(bool disposing)
         {

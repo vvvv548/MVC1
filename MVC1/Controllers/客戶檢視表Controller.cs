@@ -7,7 +7,7 @@ using System.Web.Mvc;
 
 namespace MVC1.Controllers
 {
-    public class 客戶檢視表Controller : Controller
+    public class 客戶檢視表Controller : BaseController
     {
         private 客戶資料Entities db = new 客戶資料Entities();
         // GET: 客戶檢視表

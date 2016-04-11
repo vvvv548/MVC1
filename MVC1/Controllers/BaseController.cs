@@ -7,6 +7,8 @@ using System.Web.Mvc;
 
 namespace MVC1.Controllers
 {
+    [Authorize(Roles = "sysadmin")]
+    [計算Action的執行時間]
     public abstract class BaseController : Controller
     {
         protected 客戶資料Repository repoCustInfo = RepositoryHelper.Get客戶資料Repository();

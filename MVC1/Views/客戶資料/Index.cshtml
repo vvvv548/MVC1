@@ -1,7 +1,8 @@
-﻿@model IEnumerable<MVC1.Models.客戶資料>
+﻿@model IPagedList<MVC1.Models.客戶資料>
 
 @{
     ViewBag.Title = "Index";
+    <link href="~/Content/PagedList.css" rel="stylesheet" />
 }
 
 @if (TempData["CustInfoSuccessMsg"] != null)
@@ -13,46 +14,51 @@
 
 <script>
     function Export(url) {
-        $("#form").attr("action",url);
+        $("#form").attr("action", url);
         $("#form").submit();
     }
 </script>
 
 <h2>客戶資料</h2>
 
-@using (Html.BeginForm(null,null,FormMethod.Post, new { id="form"}))
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "form" }))
 {
     <p>
-        @Html.ActionLink("新增客戶", "Create", new { }, new { @class= "btn btn-xs  btn-primary" }) 
-        <button id="btnExport" class="btn btn-xs btn-primary"  onclick="Export('@Url.Action("ExportExcel", "客戶資料")')">匯出客戶資料</button>
-        <input type = "text" name = "name" />
-        <input id = "Search" type = "submit" value = "搜尋" class="btn btn-xs"/>
-        
+        @Html.ActionLink("新增客戶", "Create", new { }, new { @class = "btn btn-xs  btn-primary" })
+        <button id="btnExport" class="btn btn-xs btn-primary" onclick="Export('@Url.Action("ExportExcel", "客戶資料")')">匯出客戶資料</button>
+        <input type="text" name="name" />
+        <input id="Search" type="submit" value="搜尋" class="btn btn-xs" />
+
     </p>
 }
 
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.客戶分類)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().客戶分類)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.客戶名稱)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().帳號)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.統一編號)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().客戶名稱)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.電話)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().統一編號)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.傳真)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().電話)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.地址)
+
+            @Html.DisplayNameFor(model => model.FirstOrDefault().傳真)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Email)
+
+            @Html.DisplayNameFor(model => model.FirstOrDefault().地址)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FirstOrDefault().Email)
         </th>
         <th></th>
     </tr>
@@ -62,6 +68,9 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.客戶分類)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.帳號)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.客戶名稱)
@@ -85,8 +94,9 @@
                 @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
                 @Html.ActionLink("Details", "Details", new { id = item.Id }) |
                 @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            </td>            
+            </td>
         </tr>
     }
-
 </table>
+
+@Html.PagedListPager(Model,page =>Url.Action("Index", new { page }))

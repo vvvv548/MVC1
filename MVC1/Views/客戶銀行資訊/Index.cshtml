@@ -1,7 +1,8 @@
-﻿@model IEnumerable<MVC1.Models.客戶銀行資訊>
+﻿@model IPagedList<MVC1.Models.客戶銀行資訊>
 
 @{
     ViewBag.Title = "Index";
+    <link href="~/Content/PagedList.css" rel="stylesheet" />
 }
 
 @if (TempData["CustBankSuccessMsg"] != null)
@@ -32,22 +33,22 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.客戶資料.客戶名稱)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().客戶資料.客戶名稱)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.銀行名稱)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().銀行名稱)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.銀行代碼)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().銀行代碼)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.分行代碼)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().分行代碼)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.帳戶名稱)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().帳戶名稱)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.帳戶號碼)
+            @Html.DisplayNameFor(model => model.FirstOrDefault().帳戶號碼)
         </th>
 
         <th></th>

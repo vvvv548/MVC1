@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using PagedList;
 
 namespace MVC1.Models
 {
@@ -23,6 +24,8 @@ namespace MVC1.Models
                 return this.All();
             }
         }
+
+
         public IQueryable<客戶聯絡人> Search(string keyword)
         {
             return this.All().Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
@@ -41,6 +44,21 @@ namespace MVC1.Models
         public 客戶聯絡人 Find(int id)
         {
             return this.All().FirstOrDefault(p => p.Id == id);
+        }
+        public IPagedList<客戶聯絡人> PagedList(int page)
+        {
+            int currentPage = page < 1 ? 1 : page;
+            int pageSize = 3;
+            var data = this.All().OrderBy(p => p.Id)
+                .ToPagedList(currentPage, pageSize);
+            return data;
+        }
+
+        public IPagedList<客戶聯絡人> PagedList(IQueryable<客戶聯絡人> data, int page)
+        {
+            int currentPage = page < 1 ? 1 : page;
+            int pageSize = 3;
+            return data.OrderBy(p => p.客戶Id).ToPagedList(currentPage, pageSize);
         }
         public override void Delete(客戶聯絡人 entity)
         {
