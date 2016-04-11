@@ -5,20 +5,6 @@
     <link href="~/Content/PagedList.css" rel="stylesheet" />
 }
 
-@if (TempData["CustInfoSuccessMsg"] != null)
-{
-    <script>
-        alert('@TempData["CustInfoSuccessMsg"]');
-    </script>
-}
-
-<script>
-    function Export(url) {
-        $("#form").attr("action", url);
-        $("#form").submit();
-    }
-</script>
-
 <h2>客戶資料</h2>
 
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "form" }))
@@ -27,7 +13,15 @@
         @Html.ActionLink("新增客戶", "Create", new { }, new { @class = "btn btn-xs  btn-primary" })
         <button id="btnExport" class="btn btn-xs btn-primary" onclick="Export('@Url.Action("ExportExcel", "客戶資料")')">匯出客戶資料</button>
         <input type="text" name="name" />
-        <input id="Search" type="submit" value="搜尋" class="btn btn-xs" />
+        @if (string.IsNullOrEmpty(ViewBag.keyword))
+        {
+            <input id="keyword" type="text" name="name" />
+        }
+        else {
+            <input id="keyword" type="text" name="name" value="@ViewBag.keyword" />
+        }
+        <button id="Search" onclick="Export('@Url.Action("Index", "客戶資料")'" class="btn btn-xs">搜尋</button>
+        
 
     </p>
 }
@@ -54,7 +48,6 @@
             @Html.DisplayNameFor(model => model.FirstOrDefault().傳真)
         </th>
         <th>
-
             @Html.DisplayNameFor(model => model.FirstOrDefault().地址)
         </th>
         <th>
@@ -100,3 +93,19 @@
 </table>
 
 @Html.PagedListPager(Model,page =>Url.Action("Index", new { page }))
+
+
+
+@if (TempData["CustInfoSuccessMsg"] != null)
+{
+    <script>
+        alert('@TempData["CustInfoSuccessMsg"]');
+    </script>
+}
+
+<script>
+    function Export(url) {
+        $("#form").attr("action", url);
+        $("#form").submit();
+    }
+</script>

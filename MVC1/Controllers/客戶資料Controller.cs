@@ -27,6 +27,7 @@ namespace MVC1.Controllers
         {
             var data = repoCustInfo.Search(name);
             var result = repoCustInfo.PagedList(data,page);
+            ViewBag.keyword = name;
             return View(result);
         }
 

@@ -26,12 +26,29 @@ namespace MVC1.Controllers
         [HttpPost]
         public ActionResult Index(string name, int page = 1)
         {
-            var data = repoCustContact.Search(name);
+            var data = repoCustContact.Search(name,string.Empty);
             var result = repoCustContact.PagedList(data, page);
             ViewBag.JobTitle = result.Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
+            if (!string.IsNullOrEmpty(name))
+            {
+                ViewBag.keyword = name;
+            }
+
+
             return View(result);
         }
-
+        public ActionResult Filter(string keyword,string jobtitle,int page) 
+        {
+            var data = repoCustContact.Search(keyword,jobtitle);
+            ViewBag.JobTitle = repoCustContact.All(false).Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
+            var result = repoCustContact.PagedList(data, page);
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                ViewBag.keyword = keyword;
+            }
+                        
+            return PartialView("ContantPartial", result);
+        }
         // GET: 客戶聯絡人/Details/5
         public ActionResult Details(int? id)
         {

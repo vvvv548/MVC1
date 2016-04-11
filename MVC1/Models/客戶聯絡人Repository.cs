@@ -26,15 +26,30 @@ namespace MVC1.Models
         }
 
 
-        public IQueryable<客戶聯絡人> Search(string keyword)
+        public IQueryable<客戶聯絡人> Search(string keyword,string jobtitle)
         {
-            return this.All().Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
+            if (string.IsNullOrEmpty(jobtitle))
+            {
+                return this.All().Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
                        p.姓名.Contains(keyword) ||
                        p.職稱.Contains(keyword) ||
                        p.電話.Contains(keyword) ||
                        p.手機.Contains(keyword) ||
                        p.電話.Contains(keyword) ||
                        p.Email.Contains(keyword));
+            }
+            else
+            {
+                return this.All().Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
+                       p.姓名.Contains(keyword) ||
+                       p.職稱.Contains(keyword) ||
+                       p.電話.Contains(keyword) ||
+                       p.手機.Contains(keyword) ||
+                       p.電話.Contains(keyword) ||
+                       p.Email.Contains(keyword))
+                       .Where(p=>p.職稱==jobtitle);
+            }
+            
         }
         public override void Add(客戶聯絡人 entity)
         {
@@ -59,6 +74,17 @@ namespace MVC1.Models
             int currentPage = page < 1 ? 1 : page;
             int pageSize = 3;
             return data.OrderBy(p => p.客戶Id).ToPagedList(currentPage, pageSize);
+        }
+        public IQueryable<客戶聯絡人> Filter(IQueryable<客戶聯絡人> data, string jobtitle)
+        {
+            if (string.IsNullOrEmpty(jobtitle)){
+                return data;
+            }
+            else
+            {
+                return data.Where(p => p.職稱 == jobtitle);
+            }
+            
         }
         public override void Delete(客戶聯絡人 entity)
         {
