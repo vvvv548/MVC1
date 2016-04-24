@@ -1,99 +1,92 @@
-﻿@model IPagedList<MVC1.Models.客戶資料>
+﻿@model IEnumerable<MVC1.Models.客戶資料>
 
 @{
-    ViewBag.Title = "Index";
-    <link href="~/Content/PagedList.css" rel="stylesheet" />
+    ViewBag.Title = "客戶資料";
 }
 
 <h2>客戶資料</h2>
 
-@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "form" }))
+@using (Html.BeginForm(null, null, FormMethod.Get, new { name = "form1" }))
 {
     <p>
-        @Html.ActionLink("新增客戶", "Create", new { }, new { @class = "btn btn-xs  btn-primary" })
-        <button id="btnExport" class="btn btn-xs btn-primary" onclick="Export('@Url.Action("ExportExcel", "客戶資料")')">匯出客戶資料</button>
-        <input type="text" name="name" />
-        @if (string.IsNullOrEmpty(ViewBag.keyword))
-        {
-            <input id="keyword" type="text" name="name" />
-        }
-        else {
-            <input id="keyword" type="text" name="name" value="@ViewBag.keyword" />
-        }
-        <button id="Search" onclick="Export('@Url.Action("Index", "客戶資料")'" class="btn btn-xs">搜尋</button>
-        
+        @Html.ActionLink("新增客戶", "Create", new { }, new { @class = "button" })
+        <input id="btnExport" type="submit" value="匯出客戶資料" formaction="@Url.Action("ExportExcel", "客戶資料")" class="button" />
+        @Html.TextBox("keyword", "", new { placeholder = "請輸入關鍵字" })
+        <input id="Search" type="submit" value="搜尋" class="button" />
 
     </p>
-}
 
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().客戶分類)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().帳號)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().客戶名稱)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().統一編號)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().電話)
-        </th>
-        <th>
 
-            @Html.DisplayNameFor(model => model.FirstOrDefault().傳真)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().地址)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().Email)
-        </th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.客戶分類)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.帳號)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.客戶名稱)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.統一編號)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.電話)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.傳真)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.地址)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            </td>
+    <table class="table" border="1" style="width:100%">
+        <tr id="tbtitle">
+            <th>
+                @Html.ActionLink("客戶分類", null)
+            </th>
+            <th>
+                @Html.ActionLink("帳號", null)
+            </th>
+            <th>
+                @Html.ActionLink("客戶名稱", null)
+            </th>
+            <th>
+                @Html.ActionLink("統一編號", null)
+            </th>
+            <th>
+                @Html.ActionLink("電話", null)
+            </th>
+            <th>
+                @Html.ActionLink("傳真", null)
+            </th>
+            <th>
+                @Html.ActionLink("地址", null)
+            </th>
+            <th>
+                @Html.ActionLink("Email", null)
+            </th>
+            <th></th>
         </tr>
-    }
-</table>
 
-@Html.PagedListPager(Model,page =>Url.Action("Index", new { page }))
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.客戶分類)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.帳號)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.客戶名稱)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.統一編號)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.電話)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.傳真)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.地址)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                </td>
+            </tr>
+        }
+    </table>
+    @Html.PagedListPager(Model as IPagedList, page => Url.Action("Index", new { page }))
+    @Html.Hidden("page")
+    @Html.Hidden("Sort")
+    @Html.Hidden("Sidx")
 
+}
 
 
 @if (TempData["CustInfoSuccessMsg"] != null)
@@ -102,10 +95,37 @@
         alert('@TempData["CustInfoSuccessMsg"]');
     </script>
 }
+@section scripts {
+    <script>
+        $(function () {
 
-<script>
-    function Export(url) {
-        $("#form").attr("action", url);
-        $("#form").submit();
-    }
-</script>
+            $('.pagination-container a').on('click', function () {
+                var href = $(this).attr('href');
+                var pid = href.substring(href.indexOf('?page=') + 6);
+                document.form1.page.value = pid;
+                document.form1.submit();
+                return false;
+            })
+            $('th a').on('click', function () {
+                if ($(this).text() == $("#Sort").val()) {
+                    if ($("#Sidx").val() == "desc") {
+                        $("#Sidx").val("asc");
+                    }
+                    else {
+                        $("#Sidx").val("desc");
+                    }
+                }
+                else {
+                    $("#Sort").val($(this).text());
+                    $("#Sidx").val("asc");
+                }
+                document.form1.submit();
+                return false;
+            })
+
+            $("#btnExport").on("click", function () {
+                $("#btnExport").submit();
+            });
+        })
+    </script>
+}

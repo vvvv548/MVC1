@@ -33,6 +33,7 @@ namespace MVC1.Models
         public string 地址 { get; set; }
         
         [StringLength(250, ErrorMessage="欄位長度不得大於 250 個字元")]
+        [EmailAddress(ErrorMessage = "請輸入符合規範的Email")]
         public string Email { get; set; }
         [Required]
         public bool 是否已刪除 { get; set; }

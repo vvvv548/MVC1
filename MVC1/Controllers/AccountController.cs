@@ -64,13 +64,13 @@ namespace MVC1.Controllers
             // 驗證.
             客戶資料 客戶資料 = repoCustInfo.All(false).Where(c => c.帳號 == data.Account).SingleOrDefault();
             
-            if (data.Account == "admin" && FormsAuthentication.HashPasswordForStoringInConfigFile(data.Password, "SHA1") == 客戶資料?.密碼)
+            if (data.Account == "admin" && (FormsAuthentication.HashPasswordForStoringInConfigFile(string.Format("{0}{1}", data.Account, data.Password), "SHA1") == 客戶資料?.密碼))
             {
                 roles = "sysadmin";
                 return true;
             }
 
-            if (FormsAuthentication.HashPasswordForStoringInConfigFile(data.Password, "SHA1") == 客戶資料?.密碼)
+            if (FormsAuthentication.HashPasswordForStoringInConfigFile(string.Format("{0}{1}", data.Account, data.Password), "SHA1") == 客戶資料?.密碼)
             {
                 customerId = 客戶資料.Id;
                 roles = "customer";

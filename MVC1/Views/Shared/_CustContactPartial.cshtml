@@ -4,7 +4,7 @@
 
 @using (Html.BeginForm())
 {
-    <table class="table">
+    <table class="table" border="1" style="width:100%">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.職稱)
@@ -23,8 +23,7 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.是否已刪除)
-            </th>
-            <th></th>
+            </th>            
         </tr>
         @{
             var data = Model.ToArray();
@@ -62,5 +61,5 @@
         }
 
     </table>
-    <input type="submit" value="批次更新聯絡人資訊" />
+    <input type="submit" value="批次更新聯絡人資訊" class="button" />
 }

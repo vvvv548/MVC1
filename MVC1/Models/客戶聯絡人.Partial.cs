@@ -8,16 +8,28 @@ namespace MVC1.Models
     public partial class 客戶聯絡人 : IValidatableObject
     {
         private 客戶資料Entities db = new 客戶資料Entities();
-
+        protected 客戶聯絡人Repository repoCustContact = RepositoryHelper.Get客戶聯絡人Repository();
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            var data = db.客戶聯絡人.Where(p => p.Email == this.Email && p.Id != this.Id && p.客戶Id == this.客戶Id);
-
-            bool isDuplicate = data.Count() > 0 ? true : false;
-            if (isDuplicate)
+            if (this.Id == 0)
             {
-                yield return new ValidationResult("相同一個客戶下的聯絡人Email不可重複！請重新輸入！",
-                    new string[] { "Email" });
+                // Create 
+                if (repoCustContact.All(false)
+                    .Where(p => 客戶Id == this.客戶Id && p.Email==this.Email)
+                    .Any())
+                {
+                    yield return new ValidationResult("相同一個客戶下的聯絡人Email不可重複！請重新輸入！", new string[]{ "Email"});
+                }
+            }
+            else
+            {
+                //Edit
+                if (repoCustContact.All(false)
+                    .Where(p => 客戶Id == this.客戶Id && p.Email == this.Email && p.Id != this.Id)
+                    .Any())
+                {
+                    yield return new ValidationResult("相同一個客戶下的聯絡人Email不可重複！請重新輸入！", new string[] { "Email" });
+                }
             }
         }
     }
@@ -40,11 +52,11 @@ namespace MVC1.Models
         
         [StringLength(250, ErrorMessage="欄位長度不得大於 250 個字元")]
         [Required]
-        [RegularExpression(@"^[_a-z0-9-]+([.][_a-z0-9-]+)*@[a-z0-9-]+([.][a-z0-9-]+)*$", ErrorMessage ="請輸入符合規範的Email")]
+        [EmailAddress(ErrorMessage = "請輸入符合規範的Email")]
         public string Email { get; set; }
         
         [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]
-        [RegularExpression(@"\d{4}-\d{6}", ErrorMessage = "請輸入正確的手機號碼 EX: 09XX-XXXXXX")]
+        [RegularExpression(@"^\d{4}-\d{6}$", ErrorMessage = "請輸入正確的手機號碼 EX: 09XX-XXXXXX")]
         public string 手機 { get; set; }
         
         [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]

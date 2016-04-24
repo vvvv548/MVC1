@@ -5,10 +5,7 @@
     {
     @Html.AntiForgeryToken()
 
-    <ul class="nav navbar-nav navbar-right">
-        <li>
-            @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "EditProfile", "Account")
-        </li>
+    <ul>
         <li>
             @Html.ActionLink("登出", "Logout", "Account")
         </li>

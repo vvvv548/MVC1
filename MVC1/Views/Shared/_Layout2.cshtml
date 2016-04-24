@@ -1,0 +1,77 @@
+﻿@{
+    if (ViewBag.IsAdmin == null)
+    {
+        ViewBag.IsAdmin = User.IsInRole("sysadmin");
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <link href="http://fonts.googleapis.com/css?family=Didact+Gothic" rel="stylesheet" />
+    <link href="~/default.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="~/fonts.css" rel="stylesheet" type="text/css" media="all" />
+
+    <!--[if IE 6]><link href="default_ie6.css" rel="stylesheet" type="text/css" /><![endif]-->
+    @*@Styles.Render("~/Content/css")*@
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+</head>
+<body>
+    <div id="header-wrapper">
+        <div id="header" class="container">
+            <div id="logo">
+                <img src="~/images/Dazzle.png" />
+            </div>
+            <div id="menu">
+                <ul>
+                    @if (ViewBag.IsAdmin)
+                    {
+                        <li>@Html.ActionLink("首頁", "Index", "Home")</li>
+                        <li>@Html.ActionLink("客戶資料", "Index", "客戶資料")</li>
+                        <li>@Html.ActionLink("客戶聯絡人", "Index", "客戶聯絡人")</li>
+                        <li>@Html.ActionLink("客戶銀行資訊", "Index", "客戶銀行資訊")</li>
+                        <li>@Html.ActionLink("客戶檢視表", "Index", "客戶檢視表")</li>
+                    }
+                    <li>@Html.Partial("_LoginPartial")</li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+    <div id="welcome">
+        @*<div id="banner" class="container">
+                <div class="title">
+                    <h2>Consectetuer adipiscing elit</h2>
+                    <span class="byline">Donec pulvinar ullamcorper metus</span>
+                </div>
+                <ul class="actions">
+                    <li><a href="#" class="button">Pulvinar mollis</a></li>
+                </ul>
+            </div>*@
+        
+        @RenderBody()
+    </div>
+    @*<div id="welcome">
+            <div class="container">
+                <div class="title">
+                    <h2>Fusce ultrices fringilla metus</h2>
+                    <span class="byline">Donec leo, vivamus fermentum nibh in augue praesent a lacus at urna congue</span>
+                </div>
+                <p>This is <strong>Assembly</strong>, a free, fully standards-compliant CSS template designed by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>. The photos in this template are from <a href="http://fotogrph.com/"> Fotogrph</a>. This free template is released under the <a href="http://templated.co/license">Creative Commons Attribution</a> license, so you're pretty much free to do whatever you want with it (even use it commercially) provided you give us credit for it. Have fun :) </p>
+                <ul class="actions">
+                    <li><a href="#" class="button">Etiam posuere</a></li>
+                </ul>
+            </div>
+        </div>*@
+    <div id="copyright" class="container">
+        <p>&copy; Untitled. All rights reserved. | Photos by <a href="http://fotogrph.com/">Fotogrph</a> | Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>.</p>
+        <p>此模板僅供作業學習使用並不做其他用途</p>
+    </div>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

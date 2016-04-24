@@ -3,31 +3,63 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MVC1.Models;
 using PagedList;
+using NPOI.XSSF.UserModel;
+using NPOI.SS.UserModel;
+using NPOI.HSSF.UserModel;
+using System.IO;
 
 namespace MVC1.Controllers
 {
     public class 客戶銀行資訊Controller : BaseController
     {
-        //private 客戶資料Entities db = new 客戶資料Entities();
-        private int pageSize = 3;
+        //private 客戶資料Entities db = new 客戶資料Entities();        
         // GET: 客戶銀行資訊
-        public ActionResult Index(int page = 1)
+        public ActionResult Index(string keyword, string Sort, string Sidx, int page = 1)
         {
-            var data = repoCustBank.PagedList(page);
-            return View(data);
+            var data = repoCustBank.All();
+            //查詢
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                data = repoCustBank.Search(data, keyword);
+            }
+
+            //排序
+            if (!string.IsNullOrEmpty(Sort))
+            {
+                if (Sort == "客戶名稱")
+                {
+                    if (Sidx == "desc")
+                    {
+                        data = data.OrderByDescending(p => p.客戶資料.客戶名稱);
+
+                    }
+                    else
+                    {
+                        data = data.OrderBy(p => p.客戶資料.客戶名稱);
+                    }
+                }
+                else
+                {
+                    data = data.OrderBy(Sort + " " + Sidx);
+                }
+            }
+            else
+            {
+                data = data.OrderBy(p => p.客戶Id);
+            }
+
+            //分頁
+            int pageSize = 3;
+            return View(data.ToPagedList(page, pageSize));
         }
-        [HttpPost]
-        public ActionResult Index(string name, int page=1)
-        {
-            var data = repoCustBank.Search(name);
-            var result = repoCustBank.PagedList(data, page);
-            return View(result);
-        }
+
+
 
         // GET: 客戶銀行資訊/Details/5
         public ActionResult Details(int? id)
@@ -90,16 +122,15 @@ namespace MVC1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶Id,銀行名稱,銀行代碼,分行代碼,帳戶名稱,帳戶號碼,是否已刪除")] 客戶銀行資訊 客戶銀行資訊)
+        public ActionResult Edit(int id, FormCollection form)
         {
-            if (ModelState.IsValid)
+            var 客戶銀行資訊 = repoCustBank.Find(id);
+            if (TryUpdateModel(客戶銀行資訊, "客戶Id,銀行名稱,銀行代碼,分行代碼,帳戶名稱,帳戶號碼".Split(',')))
             {
-                var db客戶銀行資訊 = (客戶資料Entities)repoCustBank.UnitOfWork.Context;
-                db客戶銀行資訊.Entry(客戶銀行資訊).State = EntityState.Modified;
                 repoCustBank.UnitOfWork.Commit();
-                TempData["CustBankSuccessMsg"] = 客戶銀行資訊.銀行名稱+ "更新成功";
-                return RedirectToAction("Index");
+                TempData["CustBankSuccessMsg"] = 客戶銀行資訊.銀行名稱 + "更新成功";
             }
+
             ViewBag.Client = new SelectList(repoCustInfo.All(false).Select(p => new { Id = p.Id, 客戶名稱 = p.客戶名稱 }), "Id", "客戶名稱");
             return View(客戶銀行資訊);
         }
@@ -130,9 +161,10 @@ namespace MVC1.Controllers
             return RedirectToAction("Index");
         }
 
-        public ActionResult ExportExcel()
+        public ActionResult ExportExcel(string keyword)
         {
-            return File(repoCustBank.ExportXLS(repoCustBank.All(false)), "application/vnd.ms-excel", "客戶銀行資訊.xls");
+            byte[] file=repoCustBank.Export(keyword);            
+            return this.File(file, "application/vnd.ms-excel", "客戶銀行資訊.xls");            
         }
         protected override void Dispose(bool disposing)
         {

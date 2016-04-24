@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
@@ -16,39 +17,50 @@ namespace MVC1.Controllers
         private 客戶資料Entities db = new 客戶資料Entities();
         private int pageSize = 3;
         // GET: 客戶聯絡人
-        public ActionResult Index(int page = 1)
+        public ActionResult Index(string keyword, string Sort, string Sidx,string JobTitle, int page = 1)
         {
-            var data = repoCustContact.PagedList(page);
-            ViewBag.JobTitle = data.Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
-            return View(data);
-        }
-
-        [HttpPost]
-        public ActionResult Index(string name, int page = 1)
-        {
-            var data = repoCustContact.Search(name,string.Empty);
-            var result = repoCustContact.PagedList(data, page);
-            ViewBag.JobTitle = result.Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
-            if (!string.IsNullOrEmpty(name))
-            {
-                ViewBag.keyword = name;
-            }
-
-
-            return View(result);
-        }
-        public ActionResult Filter(string keyword,string jobtitle,int page) 
-        {
-            var data = repoCustContact.Search(keyword,jobtitle);
-            ViewBag.JobTitle = repoCustContact.All(false).Select(p => new SelectListItem() { Value = p.職稱, Text = p.職稱 }).Distinct().ToList();
-            var result = repoCustContact.PagedList(data, page);
+            var data = repoCustContact.All();
+            var jobtitle_list = data.Select(p=>p.職稱).Distinct().OrderBy(p => p).ToList();
+            //查詢
             if (!string.IsNullOrEmpty(keyword))
             {
-                ViewBag.keyword = keyword;
+                data = repoCustContact.Search(data, keyword);
             }
-                        
-            return PartialView("ContantPartial", result);
+            ViewBag.JobTitle = new SelectList(jobtitle_list, JobTitle);
+            //職稱篩選
+            if (!string.IsNullOrEmpty(JobTitle))
+            {                
+                data = repoCustContact.Filter(data,JobTitle);
+            }
+            //排序
+            if (!string.IsNullOrEmpty(Sort))
+            {
+                if (Sort == "客戶名稱")
+                {
+                    if (Sidx == "desc")
+                    {
+                        data = data.OrderByDescending(p => p.客戶資料.客戶名稱);
+                    }
+                    else
+                    {
+                        data = data.OrderBy(p => p.客戶資料.客戶名稱);
+                    }
+                }
+                else
+                {
+                    data = data.OrderBy(Sort + " " + Sidx);
+                }
+            }
+            else
+            {
+                data = data.OrderBy(p => p.客戶Id);
+            }
+
+            //分頁
+            int pageSize = 3;
+            return View(data.ToPagedList(page, pageSize));
         }
+
         // GET: 客戶聯絡人/Details/5
         public ActionResult Details(int? id)
         {
@@ -110,15 +122,13 @@ namespace MVC1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶Id,職稱,姓名,Email,手機,電話,是否已刪除")] 客戶聯絡人 客戶聯絡人)
+        public ActionResult Edit(int id,FormCollection form)
         {
-            if (ModelState.IsValid)
+            var 客戶聯絡人 = repoCustContact.Find(id);
+            if(TryUpdateModel(客戶聯絡人, "客戶Id,職稱,姓名,Email,手機,電話".Split(',')))
             {
-                var db客戶聯絡人 = (客戶資料Entities)repoCustContact.UnitOfWork.Context;
-                db客戶聯絡人.Entry(客戶聯絡人).State = EntityState.Modified;
                 repoCustInfo.UnitOfWork.Commit();
                 TempData["CustContactSuccessMsg"] = 客戶聯絡人.姓名 + "更新成功";
-                return RedirectToAction("Index");
             }
             ViewBag.Client = new SelectList(repoCustInfo.All(false).Select(p => new { Id = p.Id, 客戶名稱 = p.客戶名稱 }), "Id", "客戶名稱");
             return View(客戶聯絡人);
@@ -150,9 +160,10 @@ namespace MVC1.Controllers
             return RedirectToAction("Index");
         }
 
-        public ActionResult ExportExcel()
+        public ActionResult ExportExcel(string keyword)
         {
-            return File(repoCustContact.ExportXLS(repoCustContact.All(false)), "application/vnd.ms-excel", "客戶聯絡人.xls");
+            byte[] file = repoCustContact.Export(keyword);
+            return File(file, "application/vnd.ms-excel", "客戶聯絡人.xls");
         }
         protected override void Dispose(bool disposing)
         {

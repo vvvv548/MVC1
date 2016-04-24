@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace MVC1.Models
 {
-    public class EFRepository<T> : ExcelRepository<T>, IRepository<T> where T : class
+    public class EFRepository<T> : IRepository<T> where T : class
     {
         public IUnitOfWork UnitOfWork { get; set; }
 

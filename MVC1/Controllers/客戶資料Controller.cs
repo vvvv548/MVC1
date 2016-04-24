@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
@@ -16,19 +17,29 @@ namespace MVC1.Controllers
     {
         //private 客戶資料Entities db = new 客戶資料Entities();
         // GET: 客戶資料
-        public ActionResult Index(int page=1)
+        public ActionResult Index(string keyword, string Sort ,string Sidx, int page = 1)
         {
-            var data = repoCustInfo.PagedList(page);            
-            return View(data);
-        }
-        
-        [HttpPost]        
-        public ActionResult Index(string name, int page=1)
-        {
-            var data = repoCustInfo.Search(name);
-            var result = repoCustInfo.PagedList(data,page);
-            ViewBag.keyword = name;
-            return View(result);
+            var data = repoCustInfo.All();
+
+            //查詢
+            if (!string.IsNullOrEmpty(keyword))
+            {                
+                data = repoCustInfo.Search(data, keyword);
+            }
+
+            //排序
+            if (!string.IsNullOrEmpty(Sort))
+            {
+                data = data.OrderBy(Sort + " " + Sidx);
+            }
+            else
+            {
+                data = data.OrderBy(p=>p.Id);
+            }
+
+            //分頁
+            int pageSize = 3;
+            return View(data.ToPagedList(page, pageSize));
         }
 
         // GET: 客戶資料/Details/5
@@ -101,9 +112,9 @@ namespace MVC1.Controllers
             {
                 //var db客戶資料 = (客戶資料Entities)repoCustInfo.UnitOfWork.Context;
                 //db客戶資料.Entry(客戶資料).State = EntityState.Modified;
-                客戶資料.密碼 = FormsAuthentication.HashPasswordForStoringInConfigFile(客戶資料.密碼, "SHA1");
-                repoCustInfo.UnitOfWork.Commit();                
-                if(!User.IsInRole("sysadmin"))
+                客戶資料.密碼 = FormsAuthentication.HashPasswordForStoringInConfigFile(string.Format("{0}{1}",客戶資料.帳號,客戶資料.密碼), "SHA1");
+                repoCustInfo.UnitOfWork.Commit();
+                if (!User.IsInRole("sysadmin"))
                 {
                     return View(客戶資料);
                 }
@@ -140,9 +151,10 @@ namespace MVC1.Controllers
             repoCustInfo.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
-        public ActionResult ExportExcel()
+        public ActionResult ExportExcel(string keyword)
         {
-            return File(repoCustInfo.ExportXLS(repoCustInfo.All(false)), "application/vnd.ms-excel", "客戶資料.xls");
+            byte[] file = repoCustInfo.Export(keyword);
+            return File(file, "application/vnd.ms-excel", "客戶資料.xls");
         }
 
         public ActionResult _CustContactPartial(int id)

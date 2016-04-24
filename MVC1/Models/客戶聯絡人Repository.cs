@@ -3,6 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using PagedList;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
+using System.IO;
 
 namespace MVC1.Models
 {
@@ -24,33 +27,34 @@ namespace MVC1.Models
                 return this.All();
             }
         }
-
-
-        public IQueryable<客戶聯絡人> Search(string keyword,string jobtitle)
+        /// <summary>
+        /// 查詢
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public IQueryable<客戶聯絡人> Search(IQueryable<客戶聯絡人> data, string keyword)
         {
-            if (string.IsNullOrEmpty(jobtitle))
-            {
-                return this.All().Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
-                       p.姓名.Contains(keyword) ||
-                       p.職稱.Contains(keyword) ||
-                       p.電話.Contains(keyword) ||
-                       p.手機.Contains(keyword) ||
-                       p.電話.Contains(keyword) ||
-                       p.Email.Contains(keyword));
-            }
-            else
-            {
-                return this.All().Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
-                       p.姓名.Contains(keyword) ||
-                       p.職稱.Contains(keyword) ||
-                       p.電話.Contains(keyword) ||
-                       p.手機.Contains(keyword) ||
-                       p.電話.Contains(keyword) ||
-                       p.Email.Contains(keyword))
-                       .Where(p=>p.職稱==jobtitle);
-            }
-            
+            return data.Where(p => p.客戶資料.客戶名稱.Contains(keyword) ||
+                         p.姓名.Contains(keyword) ||
+                         p.職稱.Contains(keyword) ||
+                         p.電話.Contains(keyword) ||
+                         p.手機.Contains(keyword) ||
+                         p.電話.Contains(keyword) ||
+                         p.Email.Contains(keyword));
         }
+        /// <summary>
+        /// 職稱篩選
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="jobTitle"></param>
+        /// <returns></returns>
+        public IQueryable<客戶聯絡人> Filter(IQueryable<客戶聯絡人> data, string jobTitle)
+        {
+            data = data.Where(p => p.職稱 == jobTitle);
+            return data;
+        }
+
         public override void Add(客戶聯絡人 entity)
         {
             entity.是否已刪除 = false;
@@ -60,35 +64,50 @@ namespace MVC1.Models
         {
             return this.All().FirstOrDefault(p => p.Id == id);
         }
-        public IPagedList<客戶聯絡人> PagedList(int page)
+        /// <summary>
+        /// 匯出EXCEL功能 by NPOI
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public byte[] Export(string keyword)
         {
-            int currentPage = page < 1 ? 1 : page;
-            int pageSize = 3;
-            var data = this.All().OrderBy(p => p.Id)
-                .ToPagedList(currentPage, pageSize);
-            return data;
-        }
-
-        public IPagedList<客戶聯絡人> PagedList(IQueryable<客戶聯絡人> data, int page)
-        {
-            int currentPage = page < 1 ? 1 : page;
-            int pageSize = 3;
-            return data.OrderBy(p => p.客戶Id).ToPagedList(currentPage, pageSize);
-        }
-        public IQueryable<客戶聯絡人> Filter(IQueryable<客戶聯絡人> data, string jobtitle)
-        {
-            if (string.IsNullOrEmpty(jobtitle)){
-                return data;
-            }
-            else
+            var data = this.All();
+            if (!string.IsNullOrEmpty(keyword))
             {
-                return data.Where(p => p.職稱 == jobtitle);
+                data = this.Search(data, keyword);
             }
-            
-        }
-        public override void Delete(客戶聯絡人 entity)
-        {
-            entity.是否已刪除 = true;
+            //記憶體中創建一個空的2003 Excel檔
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            //建立Sheet頁面
+            ISheet sheet = workbook.CreateSheet("客戶銀行資訊");
+            // 建立標題列
+            sheet.CreateRow(0);
+            // 設定表頭資料
+            sheet.GetRow(0).CreateCell(0).SetCellValue("客戶名稱");
+            sheet.GetRow(0).CreateCell(1).SetCellValue("姓名");
+            sheet.GetRow(0).CreateCell(2).SetCellValue("職稱");
+            sheet.GetRow(0).CreateCell(3).SetCellValue("電話");
+            sheet.GetRow(0).CreateCell(4).SetCellValue("手機");
+            sheet.GetRow(0).CreateCell(5).SetCellValue("電話");
+            sheet.GetRow(0).CreateCell(6).SetCellValue("Email");
+
+            var result = data.OrderBy(p => p.客戶Id).ToArray();
+            for (int i = 1; i <= result.Count(); i++)
+            {
+                sheet.CreateRow(i);
+                sheet.GetRow(i).CreateCell(0).SetCellValue(result[i - 1].客戶資料.客戶名稱);
+                sheet.GetRow(i).CreateCell(1).SetCellValue(result[i - 1].姓名);
+                sheet.GetRow(i).CreateCell(2).SetCellValue(result[i - 1].職稱);
+                sheet.GetRow(i).CreateCell(3).SetCellValue(result[i - 1].電話);
+                sheet.GetRow(i).CreateCell(4).SetCellValue(result[i - 1].手機);
+                sheet.GetRow(i).CreateCell(5).SetCellValue(result[i - 1].電話);
+                sheet.GetRow(i).CreateCell(6).SetCellValue(result[i - 1].Email);
+            }
+
+            MemoryStream ms = new MemoryStream();
+            workbook.Write(ms);
+            ms.Close();
+            return ms.ToArray();
         }
     }
 
