@@ -2,7 +2,7 @@
 
 
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("UpdatePartail", "客戶資料", FormMethod.Get))
 {
     <table class="table" border="1" style="width:100%">
         <tr>
@@ -21,12 +21,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.電話)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.是否已刪除)
-            </th>            
         </tr>
         @{
-            var data = Model.ToArray();
+            var data = Model.ToArray();            
         }
         @for (int i = 0; i < data.Length; i++)
         {
@@ -54,12 +51,9 @@
                     <br />
                     @Html.ValidationMessageFor(modelItem => data[i].電話, "", new { @class = "text-danger" })
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => data[i].是否已刪除)
-                </td>
             </tr>
         }
 
     </table>
     <input type="submit" value="批次更新聯絡人資訊" class="button" />
-}
+            }

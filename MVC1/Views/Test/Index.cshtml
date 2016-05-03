@@ -1,0 +1,15 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<form action="Index" method="get">
+    @Html.TextBox("Number")
+    @ViewBag.Result
+    <input id="Submit1" type="submit" value="submit" />
+</form> 
+
+
+@using (Html.BeginForm("Index", "Test", FormMethod.Get))
+{
+}

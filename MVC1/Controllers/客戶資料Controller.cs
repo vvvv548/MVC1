@@ -162,15 +162,8 @@ namespace MVC1.Controllers
             var data = repoCustContact.All(false).Where(p => p.客戶Id == id).ToList();
             return PartialView(data);
         }
-        [HttpPost]
-        public ActionResult _CustContactPartial(IList<客戶聯絡人> data)
+        public ActionResult UpdatePartail(IList<客戶聯絡人> data)
         {
-            for (int i = 0; i < data.Count; i++)
-            {
-                ModelState.Remove("data[" + i.ToString() + "].姓名");
-                ModelState.Remove("data[" + i.ToString() + "].Email");
-            }
-            int custId = -1;
             if (ModelState.IsValid && data != null)
             {
                 foreach (var item in data)
@@ -179,13 +172,12 @@ namespace MVC1.Controllers
                     contactdata.職稱 = item.職稱;
                     contactdata.手機 = item.手機;
                     contactdata.電話 = item.電話;
-                    custId = item.客戶Id;
                 }
                 repoCustContact.UnitOfWork.Commit();
-                return View(repoCustContact.All(false).Where(p => p.客戶Id == custId));
+                return RedirectToAction("Delete", new { id= data[0].客戶Id });
             }
-            ViewData.Model = repoCustContact.All(false).Where(p => p.客戶Id == custId);
-            return PartialView();
+            
+            return RedirectToAction("Index");
         }
         protected override void Dispose(bool disposing)
         {

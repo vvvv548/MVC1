@@ -129,6 +129,7 @@ namespace MVC1.Controllers
             {
                 repoCustInfo.UnitOfWork.Commit();
                 TempData["CustContactSuccessMsg"] = 客戶聯絡人.姓名 + "更新成功";
+                return RedirectToAction("Index");
             }
             ViewBag.Client = new SelectList(repoCustInfo.All(false).Select(p => new { Id = p.Id, 客戶名稱 = p.客戶名稱 }), "Id", "客戶名稱");
             return View(客戶聯絡人);

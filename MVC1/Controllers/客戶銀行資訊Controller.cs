@@ -129,6 +129,7 @@ namespace MVC1.Controllers
             {
                 repoCustBank.UnitOfWork.Commit();
                 TempData["CustBankSuccessMsg"] = 客戶銀行資訊.銀行名稱 + "更新成功";
+                return RedirectToAction("Index");
             }
 
             ViewBag.Client = new SelectList(repoCustInfo.All(false).Select(p => new { Id = p.Id, 客戶名稱 = p.客戶名稱 }), "Id", "客戶名稱");

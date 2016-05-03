@@ -9,7 +9,7 @@
 @using (Html.BeginForm("Index", "客戶銀行資訊", FormMethod.Get, new { name = "form1" }))
 {
     <p>
-        @Html.ActionLink("新增銀行資訊", "Create", new { }, new { @class = "button" })
+        @Html.ActionLink("新增銀行資訊", "Create", null, new { @class = "button" })
         <input id="btnExport" type="submit" value="匯出客戶銀行資訊" formaction="@Url.Action("ExportExcel", "客戶銀行資訊")" class="button" />
         @Html.TextBox("keyword", "", new { placeholder = "請輸入關鍵字" })
         <input id="Search" type="submit" value="搜尋" class="button" />
@@ -72,7 +72,7 @@
     @Html.Hidden("page")
     @Html.Hidden("Sort")
     @Html.Hidden("Sidx")
-    @Html.PagedListPager(Model as IPagedList, page => Url.Action("Index", new { page }))
+    @Html.PagedListPager(Model as IPagedList, p => Url.Action("Index", new { page=p }))
 }
 
 

@@ -24,23 +24,23 @@
     <table class="table" border="1" style="width:100%">
         <tr>
             <th>
-                @Html.ActionLink("客戶名稱", null)
+                @Html.ActionLink("客戶名稱", "Index",null ,new {onclick= "DoSort('客戶名稱');return false;" })
             </th>
             <th>
-                @Html.ActionLink("職稱", null)                
+                @Html.ActionLink("職稱", "Index", null, new { onclick = "DoSort('職稱');return false;" })                
                 @Html.DropDownList("JobTitle", null, "--請選擇 職稱--", new { onchange = "this.form.submit();" })
             </th>
             <th>
-                @Html.ActionLink("姓名", null)
+                @Html.ActionLink("姓名", "Index", null, new { onclick = "DoSort('姓名');return false;" })
             </th>
             <th>
-                @Html.ActionLink("Email", null)
+                @Html.ActionLink("Email", "Index", null, new { onclick = "DoSort('Email');return false;" })
             </th>
             <th>
-                @Html.ActionLink("手機", null)
+                @Html.ActionLink("手機", "Index", null, new { onclick = "DoSort('手機');return false;" })
             </th>
             <th>
-                @Html.ActionLink("電話", null)
+                @Html.ActionLink("電話", "Index", null, new { onclick = "DoSort('電話');return false;" })
             </th>
             <th></th>
         </tr>
@@ -90,28 +90,35 @@
             document.form1.submit();
             return false;
         })
-        $('th a').on('click', function () {            
-            if ($(this).text() == $("#Sort").val()) {
-                if ($("#Sidx").val() == "desc") {
-                    $("#Sidx").val("asc");
-                }
-                else {
-                    $("#Sidx").val("desc");
-                }
-            }
-            else {
-                $("#Sort").val($(this).text());
-                $("#Sidx").val("asc");
-            }
+        //$('th a').on('click', function () {            
+        //    if ($(this).text() == $("#Sort").val()) {
+        //        if ($("#Sidx").val() == "desc") {
+        //            $("#Sidx").val("asc");
+        //        }
+        //        else {
+        //            $("#Sidx").val("desc");
+        //        }
+        //    }
+        //    else {
+        //        $("#Sort").val($(this).text());
+        //        $("#Sidx").val("asc");
+        //    }
 
-            $("#form1").submit();
-            return false;
-        })
-        $("#btnExport").on("click", function () {
-            $("#btnExport").submit();
-        });
+        //    $("#form1").submit();
+        //    return false;
+        //})
     })
-
+    function DoSort(txt) {        
+        if ($("#Sidx").val() == "" || $("#Sidx").val() == "desc") {
+            $("#Sidx").val("asc");
+        } else {
+            if ($("#Sort").val() == txt) {
+                $("#Sidx").val("desc");
+            }            
+        }
+        $("#Sort").val(txt);
+        $("#form1").submit();
+    }
 </script>
 
 @if (TempData["CustContactSuccessMsg"] != null)
